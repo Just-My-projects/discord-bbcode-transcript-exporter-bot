@@ -22,14 +22,14 @@ app = web.Application()
 app.add_routes([web.get('/copy/{id}', handle)])
 app.add_routes([web.get('/botwakeup', botwakeup)])
 
-def start_background_loop(loop: asyncio.AbstractEventLoop) -> None:
+def start_background_loop() -> None:
+    loop=asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    web.run_app(app, port=10000)
+    web.run_app(app, port=10000, handle_signals=False)
 
 def start_web_server_thread(onbotwakeup=None):
-    loop = asyncio.new_event_loop()
     onbotwakeup=onbotwakeup
-    t = Thread(target=start_background_loop, args=(loop,), daemon=True)
+    t = Thread(target=start_background_loop, daemon=True)
     t.start()
 
 
