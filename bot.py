@@ -45,6 +45,8 @@ async def load_user_whitelist():
     ch = await bot.fetch_channel(chId)
     m = await ch.fetch_message(mId)  # type: ignore
     config=json.loads(str(m.content))
+    global userids_whitelist
+    global userids_whitelist_loaded
     userids_whitelist = set(config["USER_WHITELIST"])
     userids_whitelist_loaded=True
     
@@ -53,7 +55,7 @@ async def check_permissions(interaction: nextcord.Interaction):
     if interaction.user is None:
         await interaction.response.send_message("permission err: user not found")
         return False
-    if interaction.user.id in userids_whitelist:
+    if interaction.user.id not in userids_whitelist:
         await interaction.response.send_message("permission err: user not in whitelist")
         return False
     return True
@@ -179,6 +181,9 @@ async def transcript(interaction: nextcord.Interaction,
 
 @bot.slash_command(description="load_user_whitelist()")
 async def reload_whitelist(interaction: nextcord.Interaction):
+    if not await check_permissions(interaction):
+        return
+
     lastInteraction = time.time()
 
     msg = await interaction.response.send_message("Reloading")
@@ -187,7 +192,7 @@ async def reload_whitelist(interaction: nextcord.Interaction):
     except Exception as e:
         await msg.edit(content=str(e))
         raise
-    
+    await msg.edit(content="Reloaded")
 
 BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 CONFIGURATION_MESSAGE = os.getenv("CONFIGURATION_MESSAGE")
