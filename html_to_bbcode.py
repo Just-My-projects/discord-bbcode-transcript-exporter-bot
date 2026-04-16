@@ -15,12 +15,16 @@ def html_to_bbcode(hstr:str):
   soup = BeautifulSoup(hstr, 'html.parser', preserve_whitespace_tags=['span', 'div', 'p'])
   msgs = soup.select('div.chatlog__message-primary')
   for msg in msgs:
-    author=msg.select_one(".chatlog__author-name").get_text()
-    date=msg.select_one(".chatlog__timestamp").get_text()
-    date = date.split(" ") #16-04-2026 02:02 PM
-    date = date[1]+" "+date[2]
-    bbcode.append("[h2]"+bbcode_escape(author)+" "+date+"[/h2]\n")
-    msgContents = msg.select_one(".chatlog__markdown-preserve")
+    author=msg.select_one(".chatlog__author-name")
+    date=msg.select_one(".chatlog__timestamp")
+
+    if author is not None and date is not None:
+      author=author.get_text()
+      date=date.get_text()
+      date = date.split(" ") #16-04-2026 02:02 PM
+      date = date[1]+" "+date[2]
+      bbcode.append("[h2]"+bbcode_escape(author)+" "+date+"[/h2]\n")
+    msgContents = msg.select_one(".chatlog__markdown-preserve") or []
     for ch in msgContents:
       bbcode.append(msg_elem_to_bbcode(ch))
     bbcode.append("\n\n")

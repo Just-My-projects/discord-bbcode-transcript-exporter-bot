@@ -181,9 +181,6 @@ async def transcript(interaction: nextcord.Interaction,
 
 @bot.slash_command(description="load_user_whitelist()")
 async def reload_whitelist(interaction: nextcord.Interaction):
-    if not await check_permissions(interaction):
-        return
-
     lastInteraction = time.time()
 
     msg = await interaction.response.send_message("Reloading")
