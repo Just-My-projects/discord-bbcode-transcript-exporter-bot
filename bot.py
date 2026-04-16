@@ -29,6 +29,12 @@ bot = commands.Bot(
     max_messages=None)
 
 userids_whitelist=set()
+userids_whitelist_loaded=False
+
+@bot.event
+async def on_ready():
+    if not userids_whitelist_loaded:
+        await load_user_whitelist()
 
 async def load_user_whitelist():
     try:
@@ -40,6 +46,7 @@ async def load_user_whitelist():
     m = await ch.fetch_message(mId)  # type: ignore
     config=json.loads(str(m.content))
     userids_whitelist = set(config["USER_WHITELIST"])
+    userids_whitelist_loaded=True
     
 
 async def check_permissions(interaction: nextcord.Interaction):
