@@ -28,7 +28,7 @@ def html_to_bbcode(hstr:str):
 
 def msg_elem_to_bbcode(el:bs4.Tag):
   if isinstance(el,str):
-    return el
+    return bbcode_escape(el)
   
   rs=""
   rf=""

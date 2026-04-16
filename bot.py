@@ -67,7 +67,7 @@ def wakeupbot():
 
 
 @bot.slash_command(description="Save transcript bounded by two messages, inclusive.")
-async def save(interaction: nextcord.Interaction, 
+async def transcript(interaction: nextcord.Interaction, 
                msglink1:str = nextcord.SlashOption(required=True),
                msglink2:str = nextcord.SlashOption(required=True)):
     if not hasattr(interaction, "send"):
