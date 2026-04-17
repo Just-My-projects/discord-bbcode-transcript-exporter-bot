@@ -78,7 +78,7 @@ def wakeupbot():
 @bot.slash_command(description="Save transcript bounded by two messages, inclusive.")
 async def transcript(interaction: nextcord.Interaction, 
                msglink1:str = nextcord.SlashOption(required=True),
-               msglink2:str = nextcord.SlashOption(required=True)):
+               msglink2:str = nextcord.SlashOption(required=True, description="(second link can be replaced with the number of messages to include, max 999)")):
     if not hasattr(interaction, "send"):
         await interaction.response.send_message("err: unknown channel type")
         return
@@ -100,7 +100,13 @@ async def transcript(interaction: nextcord.Interaction,
 
         #Get range
         links=[]
+        limit=None
         for discordUrl in [msglink1,msglink2]:
+            if discordUrl is msglink2:
+                m=re.match(r"^(\d{1,3})$",discordUrl)
+                if m is not None:
+                    limit=int(m.group(1))
+                    break
             m = re.match(r"^https:\/\/discord\.com\/channels\/(?P<guildId>\d{17,21})\/(?P<channelId>\d{17,21})\/(?P<msgId>\d{17,21})$",
                      discordUrl)
             if m is None:
@@ -112,8 +118,8 @@ async def transcript(interaction: nextcord.Interaction,
             link.msgId = int(m.group("msgId"))
             links.append(link)
 
-        if links[0].channelId != links[1].channelId \
-          or links[0].guildId != links[1].guildId:
+        if limit is None and (links[0].channelId != links[1].channelId \
+          or links[0].guildId != links[1].guildId):
             await msgAppend("err: links must be in the same channel.")
             return
 
@@ -142,13 +148,16 @@ async def transcript(interaction: nextcord.Interaction,
                 return
             rangeDates.append(rmsg.created_at)
 
-        before = max(rangeDates)
+        before= None
+        if limit is None:
+            before = max(rangeDates)
         after = min(rangeDates) - datetime.timedelta(milliseconds=10)
+        
 
         await msgAppend("Message range determined, downloading messages.")
         transcript = await chat_exporter.export(
             tChannel,
-            limit=None,
+            limit=limit,
             tz_info="UTC",
             military_time=False,
             before=before,
